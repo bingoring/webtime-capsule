@@ -1,0 +1,26 @@
+{
+  "name": "webtime-capsule",
+  "version": "1.0.0",
+  "description": "개인 웹 브라우징 히스토리를 타임캡슐 형태로 시각화하고 관심사 변화 패턴을 분석하는 Chrome 확장 프로그램",
+  "main": "background.js",
+  "scripts": {
+    "build": "npm run package",
+    "package": "zip -r webtime-capsule.zip . -x '*.git*' '*.github*' 'node_modules/*' '*.DS_Store'",
+    "dev": "echo 'Load unpacked extension in Chrome Developer mode'"
+  },
+  "keywords": [
+    "chrome-extension",
+    "history",
+    "timeline",
+    "browsing-analytics",
+    "time-capsule",
+    "data-visualization"
+  ],
+  "author": "yw.yeom",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/webtime-capsule.git"
+  },
+  "homepage": "https://github.com/yourusername/webtime-capsule"
+}

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebTime Capsule</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <h1>🕰️ WebTime Capsule</h1>
+                <p class="subtitle">과거의 나는 무엇을 보고 있었을까?</p>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- 타임캡슐 기간 선택 -->
+            <section class="time-selector">
+                <h2>타임캡슐 열어보기</h2>
+                <div class="time-buttons">
+                    <button class="time-btn active" data-period="week">
+                        <span class="period">1주일 전</span>
+                        <span class="date" id="week-date"></span>
+                    </button>
+                    <button class="time-btn" data-period="month">
+                        <span class="period">1달 전</span>
+                        <span class="date" id="month-date"></span>
+                    </button>
+                    <button class="time-btn" data-period="quarter">
+                        <span class="period">3개월 전</span>
+                        <span class="date" id="quarter-date"></span>
+                    </button>
+                    <button class="time-btn" data-period="half">
+                        <span class="period">6개월 전</span>
+                        <span class="date" id="half-date"></span>
+                    </button>
+                    <button class="time-btn" data-period="year">
+                        <span class="period">1년 전</span>
+                        <span class="date" id="year-date"></span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- 로딩 상태 -->
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>타임캡슐을 여는 중...</p>
+            </div>
+
+            <!-- 히스토리 표시 영역 -->
+            <section class="history-section" id="history-section">
+                <div class="history-header">
+                    <h3 id="selected-period-title">1주일 전 오늘의 발자취</h3>
+                    <div class="stats" id="stats">
+                        <span class="stat-item">
+                            <span class="stat-number" id="total-sites">0</span>
+                            <span class="stat-label">사이트</span>
+                        </span>
+                        <span class="stat-item">
+                            <span class="stat-number" id="total-visits">0</span>
+                            <span class="stat-label">방문</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 타임라인 -->
+                <div class="timeline" id="timeline">
+                    <!-- 동적으로 생성 -->
+                </div>
+
+                <!-- 빈 상태 -->
+                <div class="empty-state" id="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <h3>이 시기의 기록이 없어요</h3>
+                    <p>아직 브라우징 히스토리가 충분하지 않거나<br>해당 기간에 활동이 없었습니다.</p>
+                </div>
+            </section>
+
+            <!-- 관심사 분석 -->
+            <section class="analytics-section" id="analytics-section">
+                <h3>관심사 분석</h3>
+                <div class="category-chart" id="category-chart">
+                    <!-- 동적으로 생성 -->
+                </div>
+                <div class="trend-info" id="trend-info">
+                    <!-- 동적으로 생성 -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

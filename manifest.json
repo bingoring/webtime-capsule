@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "WebTime Capsule",
+  "version": "1.0.0",
+  "description": "개인 웹 브라우징 히스토리를 타임캡슐 형태로 시각화하고 관심사 변화 패턴을 분석하는 확장 프로그램",
+  "permissions": [
+    "history",
+    "storage",
+    "tabs",
+    "contextMenus"
+  ],
+  "host_permissions": [
+    "https://www.google.com/*",
+    "https://favicon.yandex.net/*",
+    "https://icons.duckduckgo.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "64": "icons/icon-64.png",
+    "128": "icons/icon-128.png"
+  },
+  "action": {
+    "default_title": "WebTime Capsule - 과거 브라우징 히스토리 보기",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "64": "icons/icon-64.png",
+      "128": "icons/icon-128.png"
+    }
+  }
+}
