@@ -87,34 +87,85 @@ class TimeCapsule {
         }
     }
 
-    // 히스토리 데이터 가져오기
+        // 히스토리 데이터 가져오기 (주변 날짜 포함)
     async getHistoryData(period) {
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             const now = new Date();
             const daysAgo = this.getPeriodDays(period);
             const targetDate = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
 
-            // 해당 날짜의 시작과 끝 시간 설정
-            const startTime = new Date(targetDate);
-            startTime.setHours(0, 0, 0, 0);
+            // 목표 날짜 주변 ±5일 범위에서 검색
+            const searchRange = 5;
+            let bestResults = null;
+            let actualDate = null;
+            let maxVisits = 0;
 
-            const endTime = new Date(targetDate);
-            endTime.setHours(23, 59, 59, 999);
-
-            chrome.history.search({
-                text: '',
-                startTime: startTime.getTime(),
-                endTime: endTime.getTime(),
-                maxResults: 1000
-            }, (results) => {
-                if (chrome.runtime.lastError) {
-                    reject(chrome.runtime.lastError);
+            for (let offset = 0; offset <= searchRange; offset++) {
+                // 먼저 목표 날짜를 확인하고, 그 다음 앞뒤로 확장
+                const dates = [];
+                if (offset === 0) {
+                    dates.push(targetDate);
                 } else {
-                    // 방문 횟수순으로 정렬
-                    const sortedResults = results.sort((a, b) => b.visitCount - a.visitCount);
-                    resolve(sortedResults);
+                    // 과거쪽을 우선 확인 (조금 더 과거)
+                    dates.push(new Date(targetDate.getTime() - offset * 24 * 60 * 60 * 1000));
+                    dates.push(new Date(targetDate.getTime() + offset * 24 * 60 * 60 * 1000));
                 }
-            });
+
+                for (const checkDate of dates) {
+                    // 미래 날짜는 건너뛰기
+                    if (checkDate > now) continue;
+
+                    const startTime = new Date(checkDate);
+                    startTime.setHours(0, 0, 0, 0);
+
+                    const endTime = new Date(checkDate);
+                    endTime.setHours(23, 59, 59, 999);
+
+                    try {
+                        const results = await new Promise((resolveSingle, rejectSingle) => {
+                            chrome.history.search({
+                                text: '',
+                                startTime: startTime.getTime(),
+                                endTime: endTime.getTime(),
+                                maxResults: 1000
+                            }, (results) => {
+                                if (chrome.runtime.lastError) {
+                                    rejectSingle(chrome.runtime.lastError);
+                                } else {
+                                    resolveSingle(results);
+                                }
+                            });
+                        });
+
+                        const totalVisits = results.reduce((sum, item) => sum + item.visitCount, 0);
+
+                        // 더 많은 활동이 있는 날을 선택
+                        if (totalVisits > maxVisits) {
+                            maxVisits = totalVisits;
+                            bestResults = results.sort((a, b) => b.visitCount - a.visitCount);
+                            actualDate = checkDate;
+                        }
+
+                        // 목표 날짜에 충분한 활동이 있으면 바로 사용
+                        if (offset === 0 && totalVisits > 5) {
+                            break;
+                        }
+                    } catch (error) {
+                        console.error(`Error searching history for ${checkDate}:`, error);
+                    }
+                }
+
+                // 충분한 결과를 찾으면 중단
+                if (maxVisits > 10) break;
+            }
+
+            if (bestResults && bestResults.length > 0) {
+                // 실제 찾은 날짜 정보를 결과에 추가
+                bestResults.actualDate = actualDate;
+                resolve(bestResults);
+            } else {
+                resolve([]);
+            }
         });
     }
 
@@ -130,7 +181,7 @@ class TimeCapsule {
         return days[period] || 7;
     }
 
-    // 타임라인 표시
+        // 타임라인 표시
     displayTimeline(historyData) {
         const timeline = document.getElementById('timeline');
         const totalSites = document.getElementById('total-sites');
@@ -144,7 +195,7 @@ class TimeCapsule {
         totalSites.textContent = uniqueSites;
         totalVisits.textContent = totalVisitCount;
 
-        // 제목 업데이트
+        // 제목 업데이트 (실제 검색된 날짜 정보 포함)
         const periodNames = {
             week: '1주일 전',
             month: '1달 전',
@@ -152,7 +203,17 @@ class TimeCapsule {
             half: '6개월 전',
             year: '1년 전'
         };
-        periodTitle.textContent = `${periodNames[this.currentPeriod]} 오늘의 발자취`;
+
+        let titleText = `${periodNames[this.currentPeriod]} 오늘의 발자취`;
+
+        // 실제 검색된 날짜가 있으면 표시
+        if (historyData.actualDate) {
+            const actualDate = new Date(historyData.actualDate);
+            const formattedDate = `${actualDate.getMonth() + 1}/${actualDate.getDate()}`;
+            titleText = `${periodNames[this.currentPeriod]} 주변 (${formattedDate})의 발자취`;
+        }
+
+        periodTitle.textContent = titleText;
 
         // 타임라인 아이템 생성
         timeline.innerHTML = '';
